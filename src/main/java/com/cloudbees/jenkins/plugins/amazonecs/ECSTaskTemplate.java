@@ -342,7 +342,11 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> {
     }
 
     public List<ServiceContainerEntry> getServiceContainers() {
-        return serviceContainers;
+        if(serviceContainers == null) {
+            return new ArrayList<ServiceContainerEntry>();
+        } else {
+            return serviceContainers;
+        }
     }
 
     Collection<KeyValuePair> getEnvironmentKeyValuePairs() {
@@ -508,6 +512,7 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> {
                                int cpu
                                ) {
             this.name = name;
+            this.image = image;
             this.containerPath = containerPath;
             this.remoteFSRoot = remoteFSRoot;
             this.memoryReservation = memoryReservation;
