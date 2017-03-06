@@ -27,10 +27,7 @@ package com.cloudbees.jenkins.plugins.amazonecs;
 
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Deque;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -151,6 +148,8 @@ class ECSService {
      * If no, register a new task definition with desired parameters and return the new ARN.
      */
     String registerTemplate(final ECSCloud cloud, final ECSTaskTemplate template, String clusterArn) {
+        Collection<ContainerDefinition> containerDefinitions = new ArrayList<ContainerDefinition>();
+
         final AmazonECSClient client = getAmazonECSClient();
         
         String familyName = fullQualifiedTemplateName(cloud, template);
@@ -163,6 +162,36 @@ class ECSService {
                 .withCpu(template.getCpu())
                 .withPrivileged(template.getPrivileged())
                 .withEssential(true);
+
+
+        containerDefinitions.add(def);
+
+        if(template.getServiceContainers().size() > 0) {
+            ContainerDefinition serviceDef;
+            Iterator<ECSTaskTemplate.ServiceContainerEntry> serviceContainerIterator = template.getServiceContainers().iterator();
+            ArrayList<String> links = new ArrayList<String>();
+
+            while(serviceContainerIterator.hasNext()) {
+                ECSTaskTemplate.ServiceContainerEntry serviceEntry = serviceContainerIterator.next();
+                serviceDef = new ContainerDefinition()
+                        .withName(serviceEntry.name)
+                        .withImage(serviceEntry.image)
+                        .withMountPoints(template.getMountPointEntries())
+                        .withCpu(serviceEntry.cpu)
+                        .withEssential(true);
+
+                if (serviceEntry.memoryReservation > 0) /* this is the soft limit */
+                    serviceDef.withMemoryReservation(serviceEntry.memoryReservation);
+
+                if (serviceEntry.memory > 0) /* this is the hard limit */
+                    serviceDef.withMemory(serviceEntry.memory);
+
+                links.add(serviceEntry.name);
+                containerDefinitions.add(serviceDef);
+            }
+
+            def.withLinks(links);
+        }
 
         /*
             at least one of memory or memoryReservation has to be set
@@ -229,7 +258,7 @@ class ECSService {
             final RegisterTaskDefinitionRequest request = new RegisterTaskDefinitionRequest()                
                     .withFamily(familyName)
                     .withVolumes(template.getVolumeEntries())
-                    .withContainerDefinitions(def);
+                    .withContainerDefinitions(containerDefinitions);
             
             if (template.getTaskrole() != null) {
                 request.withTaskRoleArn(template.getTaskrole());
@@ -270,7 +299,7 @@ class ECSService {
         );
 
         if (!runTaskResult.getFailures().isEmpty()) {
-            LOGGER.log(Level.WARNING, "Slave {0} - Failure to run task with definition {1} on ECS cluster {2}", new Object[]{slave.getNodeName(), taskDefinitionArn, clusterArn});
+            LOGGER.log(Level.WARNING, "Slave {0} - Failure to run tkask with definition {1} on ECS cluster {2}", new Object[]{slave.getNodeName(), taskDefinitionArn, clusterArn});
             for (Failure failure : runTaskResult.getFailures()) {
                 LOGGER.log(Level.WARNING, "Slave {0} - Failure reason={1}, arn={2}", new Object[]{slave.getNodeName(), failure.getReason(), failure.getArn()});
             }

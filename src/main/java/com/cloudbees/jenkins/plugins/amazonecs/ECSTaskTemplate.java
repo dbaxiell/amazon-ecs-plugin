@@ -161,6 +161,7 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> {
 
     private List<EnvironmentEntry> environments;
     private List<ExtraHostEntry> extraHosts;
+    private List<ServiceContainerEntry> serviceContainers;
 
     /**
     * The log configuration specification for the container.
@@ -191,6 +192,7 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> {
                            int memoryReservation,
                            int cpu,
                            boolean privileged,
+                           @Nullable List<ServiceContainerEntry> serviceContainers,
                            @Nullable List<LogDriverOption> logDriverOptions,
                            @Nullable List<EnvironmentEntry> environments,
                            @Nullable List<ExtraHostEntry> extraHosts,
@@ -210,6 +212,7 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> {
         this.environments = environments;
         this.extraHosts = extraHosts;
         this.mountPoints = mountPoints;
+        this.serviceContainers = serviceContainers;
     }
 
     @DataBoundSetter
@@ -336,6 +339,10 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> {
 
     public List<ExtraHostEntry> getExtraHosts() {
         return extraHosts;
+    }
+
+    public List<ServiceContainerEntry> getServiceContainers() {
+        return serviceContainers;
     }
 
     Collection<KeyValuePair> getEnvironmentKeyValuePairs() {
@@ -485,6 +492,37 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> {
                 return "MountPointEntry";
             }
         }
+    }
+
+    public static class ServiceContainerEntry extends AbstractDescribableImpl<ServiceContainerEntry> {
+        public String name, image, containerPath, remoteFSRoot;
+        public int memoryReservation, memory, cpu;
+
+        @DataBoundConstructor
+        public ServiceContainerEntry(String name,
+                               String image,
+                               String containerPath,
+                               String remoteFSRoot,
+                               int memoryReservation,
+                               int memory,
+                               int cpu
+                               ) {
+            this.name = name;
+            this.containerPath = containerPath;
+            this.remoteFSRoot = remoteFSRoot;
+            this.memoryReservation = memoryReservation;
+            this.memory = memory;
+            this.cpu = cpu;
+        }
+
+        @Extension
+        public static class DescriptorImpl extends Descriptor<ServiceContainerEntry> {
+            @Override
+            public String getDisplayName() {
+                return "ServiceContainerEntry";
+            }
+        }
+
     }
 
     public Set<LabelAtom> getLabelSet() {
