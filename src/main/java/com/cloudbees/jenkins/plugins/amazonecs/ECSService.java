@@ -237,10 +237,10 @@ class ECSService {
 
         if(taskDefinitions.size() > 0) {
             describeTaskDefinition = client.describeTaskDefinition(new DescribeTaskDefinitionRequest().withTaskDefinition(taskDefinitions.getLast()));
-        
-            templateMatchesExistingContainerDefinition = def.equals(describeTaskDefinition.getTaskDefinition().getContainerDefinitions().get(0));
+
+            templateMatchesExistingContainerDefinition = describeTaskDefinition.getTaskDefinition().getContainerDefinitions().containsAll(containerDefinitions);
             LOGGER.log(Level.INFO, "Match on container defintion: {0}", new Object[] {templateMatchesExistingContainerDefinition});
-            LOGGER.log(Level.FINE, "Match on container defintion: {0}; template={1}; last={2}", new Object[] {templateMatchesExistingContainerDefinition, def, describeTaskDefinition.getTaskDefinition().getContainerDefinitions().get(0)});
+            LOGGER.log(Level.FINE, "Match on container defintion: {0}; template={1}; last={2}", new Object[] {templateMatchesExistingContainerDefinition, containerDefinitions, describeTaskDefinition.getTaskDefinition().getContainerDefinitions()});
             
             templateMatchesExistingVolumes = ObjectUtils.equals(template.getVolumeEntries(), describeTaskDefinition.getTaskDefinition().getVolumes());
             LOGGER.log(Level.INFO, "Match on volumes: {0}", new Object[] {templateMatchesExistingVolumes});
