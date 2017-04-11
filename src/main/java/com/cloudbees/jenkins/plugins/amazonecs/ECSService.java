@@ -329,10 +329,10 @@ class ECSService {
                     }
                 }
 
-                LOGGER.log(Level.INFO, "Instance {0} has {1}mb of free memory. {2}mb are required", new Object[]{ instance.getContainerInstanceArn(), memoryResource.getIntegerValue(), template.getMemoryConstraint()});
-                LOGGER.log(Level.INFO, "Instance {0} has {1} units of free cpu. {2} units are required", new Object[]{ instance.getContainerInstanceArn(), cpuResource.getIntegerValue(), template.getCpu()});
-                if(memoryResource.getIntegerValue() >= template.getMemoryConstraint()
-                        && cpuResource.getIntegerValue() >= template.getCpu()) {
+                LOGGER.log(Level.INFO, "Instance {0} has {1}mb of free memory. {2}mb are required", new Object[]{ instance.getContainerInstanceArn(), memoryResource.getIntegerValue(), template.getTotalMemoryConstraint()});
+                LOGGER.log(Level.INFO, "Instance {0} has {1} units of free cpu. {2} units are required", new Object[]{ instance.getContainerInstanceArn(), cpuResource.getIntegerValue(), template.getTotalCpu()});
+                if(memoryResource.getIntegerValue() >= template.getTotalMemoryConstraint()
+                        && cpuResource.getIntegerValue() >= template.getTotalCpu()) {
                     hasEnoughResources = true;
                     break WHILE;
                 }
@@ -343,7 +343,7 @@ class ECSService {
         } while(!hasEnoughResources && timeout.after(new Date()));
 
         if(!hasEnoughResources) {
-            final String msg = MessageFormat.format("Timeout while waiting for sufficient resources: {0} cpu units, {1}mb free memory", template.getCpu(), template.getMemoryConstraint());
+            final String msg = MessageFormat.format("Timeout while waiting for sufficient resources: {0} cpu units, {1}mb free memory", template.getTotalCpu(), template.getTotalMemoryConstraint());
             LOGGER.log(Level.WARNING, msg);
             throw new AbortException(msg);
         }

@@ -108,6 +108,16 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> {
         return this.memory;
     }
 
+    public int getTotalMemoryConstraint() {
+        int totalMemoryConstraint = getMemoryConstraint();
+
+        for(ServiceContainerEntry service:serviceContainers) {
+            totalMemoryConstraint += service.getMemoryConstraint();
+        }
+
+        return totalMemoryConstraint;
+    }
+
     /**
      * The number of <code>cpu</code> units reserved for the container. A
      * container instance has 1,024 <code>cpu</code> units for every CPU
@@ -212,7 +222,12 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> {
         this.environments = environments;
         this.extraHosts = extraHosts;
         this.mountPoints = mountPoints;
-        this.serviceContainers = serviceContainers;
+
+        if(serviceContainers == null) {
+            this.serviceContainers = new ArrayList<ServiceContainerEntry>();
+        } else {
+            this.serviceContainers = serviceContainers;
+        }
     }
 
     @DataBoundSetter
@@ -262,6 +277,16 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> {
 
     public int getCpu() {
         return cpu;
+    }
+
+    public int getTotalCpu() {
+        int totalCpu = cpu;
+
+        for(ServiceContainerEntry service:serviceContainers) {
+            totalCpu += service.getCpu();
+        }
+
+        return totalCpu;
     }
 
     public String getDnsSearchDomains() {
@@ -341,13 +366,7 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> {
         return extraHosts;
     }
 
-    public List<ServiceContainerEntry> getServiceContainers() {
-        if(serviceContainers == null) {
-            return new ArrayList<ServiceContainerEntry>();
-        } else {
-            return serviceContainers;
-        }
-    }
+    public List<ServiceContainerEntry> getServiceContainers() { return serviceContainers; }
 
     Collection<KeyValuePair> getEnvironmentKeyValuePairs() {
         if (null == environments || environments.isEmpty()) {
@@ -518,6 +537,23 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> {
             this.memoryReservation = memoryReservation;
             this.memory = memory;
             this.cpu = cpu;
+        }
+
+        public int getMemoryConstraint() {
+            if (this.memoryReservation > 0) {
+                return this.memoryReservation;
+            }
+            return this.memory;
+        }
+
+        public int getMemory() { return memory; }
+
+        public int getMemoryReservation() {
+            return memoryReservation;
+        }
+
+        public int getCpu() {
+            return cpu;
         }
 
         @Extension
