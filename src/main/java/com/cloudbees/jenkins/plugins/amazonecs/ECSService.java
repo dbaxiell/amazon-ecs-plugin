@@ -174,17 +174,17 @@ class ECSService {
             while(serviceContainerIterator.hasNext()) {
                 ECSTaskTemplate.ServiceContainerEntry serviceEntry = serviceContainerIterator.next();
                 serviceDef = new ContainerDefinition()
-                        .withName(serviceEntry.name)
-                        .withImage(serviceEntry.image)
+                        .withName(serviceEntry.getName())
+                        .withImage(serviceEntry.getImage())
                         .withMountPoints(template.getMountPointEntries())
                         .withCpu(serviceEntry.cpu)
                         .withEssential(true);
 
                 if (serviceEntry.memoryReservation > 0) /* this is the soft limit */
-                    serviceDef.withMemoryReservation(serviceEntry.memoryReservation);
+                    serviceDef.withMemoryReservation(serviceEntry.getMemoryReservation());
 
                 if (serviceEntry.memory > 0) /* this is the hard limit */
-                    serviceDef.withMemory(serviceEntry.memory);
+                    serviceDef.withMemory(serviceEntry.getMemory());
 
                 links.add(serviceEntry.name);
                 containerDefinitions.add(serviceDef);

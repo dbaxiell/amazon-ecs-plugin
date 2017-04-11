@@ -556,6 +556,10 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> {
             return cpu;
         }
 
+        public String getImage() { return image; }
+
+        public String getName() { return name; }
+
         @Extension
         public static class DescriptorImpl extends Descriptor<ServiceContainerEntry> {
             @Override
