@@ -299,7 +299,7 @@ class ECSService {
         );
 
         if (!runTaskResult.getFailures().isEmpty()) {
-            LOGGER.log(Level.WARNING, "Slave {0} - Failure to run tkask with definition {1} on ECS cluster {2}", new Object[]{slave.getNodeName(), taskDefinitionArn, clusterArn});
+            LOGGER.log(Level.WARNING, "Slave {0} - Failure to run task with definition {1} on ECS cluster {2}", new Object[]{slave.getNodeName(), taskDefinitionArn, clusterArn});
             for (Failure failure : runTaskResult.getFailures()) {
                 LOGGER.log(Level.WARNING, "Slave {0} - Failure reason={1}, arn={2}", new Object[]{slave.getNodeName(), failure.getReason(), failure.getArn()});
             }
